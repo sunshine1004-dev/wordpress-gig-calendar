@@ -14,16 +14,17 @@ class Simplify_HTTP
 	const HTTP_NOT_ALLOWED = 405;
 	const HTTP_BAD_REQUEST = 400;
 
-	const API_NUM_HEADERS     = 7;
-	const API_URI             = 'https://api.optune.me/bookings';
+	const API_URI = 'https://api.optune.me/bookings';
+
+	const USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36';
+	const TIMEOUT = 60;
+
 
 	static private $_validMethods = array(
 		"post" => self::POST,
 		"put" => self::PUT,
 		"get" => self::GET,
 		"delete" => self::DELETE);
-
-	static private $_userAgent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36';
 
 	private function request($url, $method, $params = '')
 	{
@@ -33,14 +34,23 @@ class Simplify_HTTP
 
 		$method = self::$_validMethods[strtolower($method)];
 
+		// Setup full API Url
+		$url = self::API_URI . '/' . $url;
+
 		$curl = curl_init();
 
+		$headers = array();
 		$options = array();
-
 		$options[CURLOPT_URL] = $url;
 		$options[CURLOPT_CUSTOMREQUEST] = $method;
-		$options[CURLOPT_RETURNTRANSFER] = true;
-		$options[CURLOPT_FAILONERROR] = false;
+		$options[CURLOPT_RETURNTRANSFER] = TRUE;
+		$options[CURLOPT_FAILONERROR] = FALSE;
+		$options[CURLOPT_NOBODY] = FALSE; // get body request
+		$options[CURLOPT_USERAGENT] = self::USER_AGENT;
+		$options[CURLOPT_AUTOREFERER] = TRUE; // add REFERER header
+		$options[CURLOPT_FOLLOWLOCATION] = TRUE; // add auto redirect
+		$options[CURLOPT_CONNECTTIMEOUT] =  self::TIMEOUT; // set connection timeout
+		$options[CURLOPT_TIMEOUT] = self::TIMEOUT;
 
 		if ($method == self::POST || $method == self::PUT) {
 			$headers = array(
@@ -53,7 +63,6 @@ class Simplify_HTTP
             $options[CURLOPT_HTTPGET] = 1;}
 
 		array_push($headers, 'Accept: application/json');
-		array_push($headers, 'User-Agent: ' . self::$_userAgent);
 
 		$options[CURLOPT_HTTPHEADER] = $headers;
 

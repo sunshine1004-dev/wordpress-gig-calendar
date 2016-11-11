@@ -9,31 +9,23 @@
  * License: GPL2
  */
 
+// Backend
 class GigCalendar 
 {
-    /**
-     * Holds the values to be used in the fields callbacks
-     */
+    // Holds the values to be used in the fields callbacks
     private $options;
 
-    /**
-     * Start up
-     */
+    // Start up
     public function __construct(){
       add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
-      //add_action( 'admin_menu', array( $this, 'wpsact' ) );
     }
 
-    /**
-     * Add options page to main menu
-     */
+    // Add options page to main menu
     public function add_plugin_page(){
 		add_menu_page('Gig Calendar', 'Gig Calendar', 'administrator', 'gig-settings', array( $this, 'gig_settings_page' ), 'dashicons-admin-generic'); }
 
-    /**
-     * Show Options page
-     */
+    // Show Options page
     public function gig_settings_page(){
         $this->options = get_option( 'gig_option_name' );
         ?>
@@ -43,7 +35,7 @@ class GigCalendar
             <?php
                 // This prints out all hidden setting fields
                 settings_fields( 'gig_option_group' );   
-                do_settings_sections( 'gig-setting-admin' );
+                do_settings_sections( 'gig-settings-admin' );
                 submit_button(); 
             ?>
             </form>
@@ -51,9 +43,7 @@ class GigCalendar
         <?php
     }
 
-    /**
-     * Register and add settings
-     */
+    // Register and add settings
     public function page_init()
     {        
         register_setting(
@@ -65,15 +55,34 @@ class GigCalendar
         add_settings_section(
             'gig_setting_section_id', // ID
             'Gig Calendar Settings', // Title
-            array( $this, 'print_section_info' ), // Callback
-            'wp-gig-setting-admin' // Page
+            '', //array( $this, 'print_section_info' ),
+            'gig-settings-admin' // Page
         );  
 
+		  // Username input
         add_settings_field(
             'gig_username', 
             'Your Optune Username', 
             array( $this, 'gig_username' ), 
-            'gig-setting-admin', 
+            'gig-settings-admin', 
+            'gig_setting_section_id'
+        );      
+
+		  // Default post status
+        add_settings_field(
+            'gig_post_status', 
+            'Default Post Status', 
+            array( $this, 'gig_post_status' ), 
+            'gig-settings-admin', 
+            'gig_setting_section_id'
+        );      
+		  
+		  // Default post type
+        add_settings_field(
+            'gig_post_type', 
+            'Default Post Type', 
+            array( $this, 'gig_post_type' ), 
+            'gig-settings-admin', 
             'gig_setting_section_id'
         );      
     }
@@ -89,18 +98,16 @@ class GigCalendar
         if( isset( $input['gig_username'] ) )
             $new_input['gig_username'] = sanitize_text_field( $input['gig_username'] );
 
+        if( isset( $input['gig_post_status'] ) )
+            $new_input['gig_post_status'] = sanitize_text_field( $input['gig_post_status'] );
+
+        if( isset( $input['gig_post_type'] ) )
+            $new_input['gig_post_type'] = sanitize_text_field( $input['gig_post_type'] );
+
         return $new_input;
     }
 
-    /** 
-     * Print the Section text
-     */
-    public function print_section_info(){
-        print 'WP Gig Calendar settings'; }
-
-    /** 
-     * Print username field
-     */
+    // Print username field
     public function gig_username(){
         printf(
             '<input type="text" id="gig_username" name="gig_option_name[gig_username]" value="%s" />',
@@ -108,117 +115,205 @@ class GigCalendar
         );
     }
 
-	public function wpsact( )
-	{
-		global $themename, $shortname, $options, $spawned_options;
+    // Print post status field
+    public function gig_post_status(){
+        echo
+				'<select type="option" id="gig_post_status" name="gig_option_name[gig_post_status]">
+					<option ', ( $this->options['gig_post_status'] == 'publish' ? 'selected' : '' ), ' value="publish">publish</option>
+					<option ', ( $this->options['gig_post_status'] == 'draft' ? 'selected' : '' ), ' value="draft">draft</option>
+					<option ', ( $this->options['gig_post_status'] == 'pending' ? 'selected' : '' ), ' value="pending">pending</option>
+				</select>';
+    }
 
-		$timeout			= 30;
-		$ua				= 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/27.0.1453.94 Safari/537.36';
-		$url				= $_POST['wpscraper_option_name']['wps_url'];
-		$url_pattern	= $_POST['wpscraper_option_name']['wps_url_pattern'];
-		$num				= $_POST['wpscraper_option_name']['wps_postNum'];
-		$proxy			= $_POST['wpscraper_option_name']['wps_proxy'];
-		if( $url_pattern == '' )
-			return;
+    // Print post type field
+    public function gig_post_type(){
+        echo
+				'<select type="option" id="gig_post_type" name="gig_option_name[gig_post_type]">
+					<option ', ( $this->options['gig_post_type'] == 'post' ? 'selected' : '' ), ' value="post">post</option>
+					<option ', ( $this->options['gig_post_type'] == 'gig' ? 'selected' : '' ), ' value="gig">gig</option>
+				</select>';
+    }
 
-		if( $url == '' )
-			$url = $url_pattern;
+}
 
-		if( $num == '' )
-			$num = 999;
+// Api helper
+class GigPosts
+{
+	// Special post type to detect Gigs
+	const SPEC = 'gig';
 
-		switch( $url_pattern )
-			{
-				case( 'https://techcrunch.com/social' ): 
-					$selector	= '//div/h2[@class="post-title"]';
-					$parser		= 'parse_techcrunch_com';
-					$rem_url		= 'tctechcrunch2011.files.wordpress.com';
-					$rem_url2	= 'techcrunch.com';
-					break;
-				default: 
-					$selector	= '//div/h2[@class="post-title"]';
-					$parser		= 'parse_techcrunch_com';
-			};
+	// Plugin settings here
+	private $options;
 
-		$web = curl_init();
-		curl_setopt( $web, CURLOPT_HEADER,				FALSE					); // no need headers
-		curl_setopt( $web, CURLOPT_NOBODY,				FALSE					); // get body request
-		curl_setopt( $web, CURLOPT_RETURNTRANSFER,	TRUE					);
-		curl_setopt( $web, CURLOPT_USERAGENT,			$ua					); // UA spoof
-		curl_setopt( $web, CURLOPT_AUTOREFERER,		TRUE					); // add REFERER header
-		curl_setopt( $web, CURLOPT_FOLLOWLOCATION,	TRUE					); // add auto redirect
-		curl_setopt( $web, CURLOPT_CONNECTTIMEOUT,	$timeout				); // set connection timeout
-		curl_setopt( $web, CURLOPT_TIMEOUT,				$timeout				);
+	public function __construct(){
+      $this->options = get_option( 'gig_option_name' );
+	}
 
-		$count = 1;
-		$page = 1;
-		$links = array();
-		while( $count <= $num )
-			{
-				$page_url = $url.'/page/'.$page;
-				curl_setopt( $web, CURLOPT_URL, $page_url );
-				$data = curl_exec( $web );
-				$page++;
-				if( !empty( $data ) )
-					{
-						$res = $this->getPostLinks( $data, $selector );
-						$count = $count + count( $res );
-						$links = array_merge( $links, $res );
-					}
+	public function getOldGigs(){
+		$args = array(
+			'posts_per_page'	=> -1,
+			'post_type'			=> $this->options['gig_post_type'],
+			'post_content'		=> self::SPEC,
+			'orderby'			=> 'date',
+			'sort_order'		=> 'desc',
+			'date_query' => array(
+				array( 
+					'before' => '1 days ago',
+					'inclusive'		=> TRUE,
+				),
+			),
+			'post_status'		=> array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash' ),
+		);
+		
+		$posts = get_posts( $args );
+		if( count( $posts ) > 0 )
+			return TRUE;
+
+		return FALSE;
+	}
+
+	public function storeGigs( $gigs ){
+		foreach( $gigs as $gig ){
+			global $user_ID, $wpdb;
+
+			$post_id = wp_insert_post( array
+				(
+					'post_title'		=> wp_strip_all_tags( $gig['title'] ),
+					'post_type'			=> $this->options['gig_post_type'],
+					'post_content'		=> self::SPEC,
+					'post_author'		=> get_current_user_id(),
+					'post_status'		=> $this->options['gig_post_status'],
+				)
+			);
+
+			// Insert or Update Gig dates
+			if ( ! add_post_meta( $post_id, 'playDate', $gig['playDate'], true ) ){
+				update_post_meta ( $post_id, 'playDate', $gig['playDate'] ); }
+
+			if ( ! add_post_meta( $post_id, 'playTime', $gig['playTime'], true ) ){
+				update_post_meta ( $post_id, 'playTIme', $gig['playTime'] ); }
+		}
+	}
+
+	public function removeOldGigs(){
+		if( $posts = getAllGigs() ){
+			foreach( $posts as $post ){
+				delete_post_meta( $post->ID, 'playDate' );
+				delete_post_meta( $post->ID, 'playTime' );
+				wp_delete_post( $post->ID, TRUE );
 			}
-		$links = array_slice( $links, 0, $num );
+		}
+	}
 
-		foreach( $links as $link )
-			{
-				curl_setopt( $web, CURLOPT_URL, $link ); // API URL
-				$content = curl_exec( $web );
-
-				if( !empty( $content ) )
-					{
-						list( $post, $links ) = $this->$parser( $content, $rem_url, $rem_url2 );
-
-						global $user_ID, $wpdb;
-
-						$query = $wpdb->prepare(
-							"SELECT ID FROM " . $wpdb->posts . "
-							WHERE post_title = %s",
-							$post['title']
-						);
-						$wpdb->query( $query );
-
-						if ( !$wpdb->num_rows ) 
-							{
-								$post_id = wp_insert_post( array
-									(
-										'post_title'		=> wp_strip_all_tags( $post['title'] ),
-										'post_content'		=> $post['content'],
-										'post_date'			=> $post['date'],
-										'post_author'		=> get_current_user_id(),
-										'post_status'		=> 'publish'
-									)
-								);
-								foreach( $links as $link )
-									{
-										$image = media_sideload_image( $link, $post_id, '', 'src' );
-										$post['content'] = str_replace( $link, $image, $post['content'] );
-									}
-								wp_update_post( array
-									(
-										'ID'					=> $post_id,
-										'post_title'		=> wp_strip_all_tags( $post['title'] ),
-										'post_content'		=> $post['content'],
-									)
-								);
-							}
-					}
+	public function getAllGigs(){
+	/*
+			$args = array(
+				'posts_per_page'	=> -1,
+				'post_title'		=> wp_strip_all_tags( $gig['title'] ),
+				'post_type'			=> 'gig',
+				'meta_query'		=> array(
+					'relation'		=> 'AND',
+					array(
+						'key'			=> 'playDate',
+						'value'		=> $gig['playDate'],
+					),
+					array(
+						'key'			=> 'playTime',
+						'value'		=> $gig['playTime'],
+					),
+				),
+			);
+			
+			$post = get_posts( $args );
+			if( count( $post ) > 0 ) {
+				var_dump( $post );
 			}
+	*/
+		$args = array(
+			'posts_per_page'	=> -1,
+			'post_type'			=> $this->options['gig_post_type'],
+			'post_content'		=> self::SPEC,
+			'orderby'			=> 'date',
+			'sort_order'		=> 'desc',
+			'post_status'		=> array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash' ),
+		);
+		
+		$posts = get_posts( $args );
+		if( count( $posts ) > 0 )
+			return $posts;
 
-		curl_close($web); 
+		return FALSE;
+	}
+
+	public function displayError(){
+		echo 'No Gigs Available';
+	}
+
+	public function displayGigs( $gigs ){
+		foreach( $gigs as $gig ){
+?>
+		<div class="summary card padded row push top mini interactive">
+			<div class="column third">
+				<div class="media">
+					<div class="push right small">
+						<p class="sized normal">&nbsp;</p>
+					</div>
+					<div class="body flex">
+						<header class="text small uppercase">
+							<sub>We</sub>
+							<!-- react-text: 6024 -->&nbsp;<!-- /react-text -->
+							<!-- react-text: 6025 -->16.11.2016<!-- /react-text -->
+							<!-- react-text: 6026 -->&nbsp;<!-- /react-text -->
+						</header>
+						<div class="body push top bottom micro">
+							<h3 class="h1 bold">Moscow meet</h3>
+						</div>
+						<div class="footer text small">
+							<!-- react-text: 6030 -->Test Venue<!-- /react-text -->
+							<!-- react-text: 6031 --> <!-- /react-text -->
+							<sub></sub>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="column third">
+				<h4 class="font-small-bold push bottom micro">
+					<!-- react-text: 6035 -->Status<!-- /react-text -->
+					<span class="font-small-regular neutral push left small">Confirmed</span>
+				</h4>
+			</div>
+		</div>
+<?php
+		}
 	}
 
 }
 
-if( is_admin() )
-	{
-		$my_gig = new GigCalendar();
+// Add shortcode to display Gig calendar
+add_shortcode('gig-calendar', 'show_gig_calendar');
+function show_gig_calendar(){
+	$gigs = new GigPosts();
+
+	// If our Gigs info is old...
+	if( $gigs->getOldGigs() ){
+		require_once( 'lib/Http.php' );
+
+		// Remove old gigs to insert new one
+		$gigs->removeOldGigs();
+
+		$web = new Simplify_HTTP();
+		$data = $web->apiRequest( $gigs->options['gig_username'], 'GET' );
+		$gigs->storeGigs( $data );
 	}
+
+	
+	if( $posts = $gigs->getAllGigs() ){
+		$gigs->displayGigs( $posts );
+	} else {
+		$gigs->displayError();
+	}
+}
+
+if( is_admin() ){
+		$admin = new GigCalendar(); }
+
