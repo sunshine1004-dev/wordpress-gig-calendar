@@ -28,9 +28,8 @@ class Simplify_HTTP
 
 	private function request($url, $method, $params = '')
 	{
-		if (!array_key_exists(strtolower($method), self::$_validMethods)) {
-			throw new InvalidArgumentException('Invalid method: '.strtolower($method));
-		}
+		if (!array_key_exists(strtolower($method), self::$_validMethods))
+			return array('status' => FALSE, 'object' => FALSE);
 
 		$method = self::$_validMethods[strtolower($method)];
 
@@ -72,9 +71,8 @@ class Simplify_HTTP
 		$errno = curl_errno($curl);
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-		if ($data == false || $errno != CURLE_OK) {
-			throw new Simplify_ApiConnectionException(curl_error($curl));
-		}
+		if ($data == false || $errno != CURLE_OK)
+			return array('status' => FALSE, 'object' => FALSE);
 
 		$object = json_decode($data, true);
 		$response = array('status' => $status, 'object' => $object);
@@ -132,11 +130,6 @@ class Simplify_HTTP
 	 * @param $authentication
 	 * @param string $payload
 	 * @return mixed
-	 * @throws Simplify_AuthenticationException
-	 * @throws Simplify_ObjectNotFoundException
-	 * @throws Simplify_BadRequestException
-	 * @throws Simplify_NotAllowedException
-	 * @throws Simplify_SystemException
 	 */
 	public function apiRequest($url, $method, $params = ''){
 
@@ -149,20 +142,7 @@ class Simplify_HTTP
 			return $object;
 		}
 
-		if ($status == self::HTTP_REDIRECTED) {
-			throw new Simplify_BadRequestException("Unexpected response code returned from the API, have you got the correct URL?", $status, $object);
-		} else if ($status == self::HTTP_BAD_REQUEST) {
-			throw new Simplify_BadRequestException("Bad request", $status, $object);
-		} else if ($status == self::HTTP_UNAUTHORIZED) {
-			throw new Simplify_AuthenticationException("You are not authorized to make this request.  Are you using the correct API keys?", $status, $object);
-		} else if ($status == self::HTTP_NOT_FOUND) {
-			throw new Simplify_ObjectNotFoundException("Object not found", $status, $object);
-		} else if ($status == self::HTTP_NOT_ALLOWED) {
-			throw new Simplify_NotAllowedException("Operation not allowed", $status, $object);
-		} else if ($status < 500) {
-			throw new Simplify_BadRequestException("Bad request", $status, $object);
-		}
-		throw new Simplify_SystemException("An unexpected error has been raised.  Looks like there's something wrong at our end." , $status, $object);
+		return FALSE;
 	}
 
 }
