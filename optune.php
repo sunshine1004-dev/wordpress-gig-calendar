@@ -249,34 +249,18 @@ class GigPosts
 			$day = date( 'D', strtotime( get_post_meta( $gig->ID, 'playDate', TRUE ) ) );
 			$date = date( 'd-m-Y', strtotime( get_post_meta( $gig->ID, 'playDate', TRUE ) ) );
 ?>
-		<div class="summary card padded row push top mini interactive">
-			<div class="column third">
-				<div class="media">
-					<div class="push right small">
-						<p class="sized normal">&nbsp;</p>
-					</div>
-					<div class="body flex">
-						<header class="text small uppercase">
-							<sub><?php echo $day; ?></sub>
-							&nbsp; <?php echo $date; ?> &nbsp;
-						</header>
-						<div class="body push top bottom micro">
-							<h3 class="h1 bold"><?php echo $gig->post_title; ?></h3>
-						</div>
-						<div class="footer text small">
-							<?php echo $venue['name']; ?>
-							<p class="sized small"><?php echo $venue['city']; ?></p>
-							<sub></sub>
-						</div>
-					</div>
+		<div class="commentlist gig-container">
+				<div class="commentmetadata gig-date">
+					<span><?php echo $day; ?></span>
+					<small><?php echo $date; ?></small>
 				</div>
-			</div>
-			<div class="column third">
-				<h4 class="font-small-bold push bottom micro">
-					<!-- react-text: 6035 -->Status<!-- /react-text -->
-					<span class="font-small-regular neutral push left small">Confirmed</span>
-				</h4>
-			</div>
+				<div class="commentmetadata gig-title">
+					<h3><?php echo $gig->post_title; ?></h3>
+				</div>
+				<div class="commentmetadata gig-location">
+					<span><?php echo $venue['name']; ?></span>
+					<small><?php echo $venue['city']; ?></small>
+				</div>
 		</div>
 <?php
 		}

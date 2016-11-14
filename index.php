@@ -39,12 +39,7 @@ function show_gig_calendar(){
 // Add default CSS
 add_action( 'wp_enqueue_scripts', 'add_css_styles' );
 function add_css_styles() {
-    wp_register_style(
-        'main_css',
-			plugins_url( 'css/main.scss.css', __FILE__ )
-    );
-
-    wp_enqueue_style( 'main_css', plugins_url( 'css/main.scss.css', __FILE__ ), array(), '' );
+    wp_enqueue_style( 'optune_css', plugins_url( 'css/style.css', __FILE__ ), array(), '' );
 }
 
 // Display settings page if we in Admin section

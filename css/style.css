@@ -1,0 +1,17 @@
+/* Default style for Optune Gigs */
+
+.gig-container
+{
+	border-bottom: 1px solid #27E200;
+	margin-bottom: 2em;
+}
+
+.gig-date
+{
+	background-color: #D6D3CF;
+}
+
+.gig-location > small
+{
+	font-weight: bold;
+}
