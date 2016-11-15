@@ -16,7 +16,7 @@ class GigCalendar
 
     // Add options page to main menu
     public function add_plugin_page(){
-		add_menu_page('Gig Calendar', 'Gig Calendar', 'administrator', 'gig-settings', array( $this, 'gig_settings_page' ), 'dashicons-admin-generic'); }
+		add_menu_page('Optune Gigs', 'Optune Gigs', 'administrator', 'gig-settings', array( $this, 'gig_settings_page' ), 'dashicons-admin-generic'); }
 
     // Show Options page
     public function gig_settings_page(){
