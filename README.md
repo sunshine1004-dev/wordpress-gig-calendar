@@ -1,3 +1,0 @@
-Official Optune Wordpress Plugin
-================================
-
