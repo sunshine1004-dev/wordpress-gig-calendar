@@ -1,8 +1,9 @@
 === Plugin Name ===
-Contributors: sergey pestin, optune, schmidsi
+Contributors: sergey pestin @herostat88, optune, schmidsi
 Tags: gigs, events, calendar, optune, dj, upcoming gigs
+Donate link: https://profiles.wordpress.org/herostat88
 Requires at least: 4.6
-Tested up to: 4.6.1
+Tested up to: 4.7
 Stable tag: trunk,
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -26,7 +27,7 @@ This section describes how to install the plugin and get it working.
 1. There is now a new item in your admin menu: "Optune Gigs".  Go there to configure the plugin.
 1. Enter your artist handle in the field "Your Optune Username"
 1. Choose the status that the auto-generated post will have. If you choose "publish", new gigs/posts are published automatically.
-1. Choose the type of post. If you choose "gig", new gigs will not show up as posts, but are in the database to be displayd with the  shortcode.
+1. Choose the type of post. If you choose "gig", new gigs will not show up as posts, but are in the database to be displayd with the `[gig-calendar]` shortcode.
 
 
 == Frequently Asked Questions ==
@@ -35,3 +36,8 @@ This section describes how to install the plugin and get it working.
 
 Optune.me is the online collaboration platform for events & gigs where DJs, promoters and agents work together. DJs can 
 manage their upcoming gigs easily. Checkout www.optune.me
+
+== Changelog ==
+
+= 1.0 =
+First release
