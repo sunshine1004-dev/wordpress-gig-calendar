@@ -13,7 +13,7 @@ Automatically import your optune.me gigs to your Wordpress
 
 This plugin automatically creates a post for every gig on your optune.me account. You can choose if the post is published 
 imediately or if you want to publish it manually. Furthermore, you can display a list of all your upcoming gigs on a page
-or post with the shortcode `[gig-calendar]`.
+or post with the shortcode `[optune-gig-calendar]`.
 
 If you don't want to have a new post for every gig you can change the post type to gig.
 

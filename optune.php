@@ -3,23 +3,23 @@
 // API classes
 
 // Backend
-class GigCalendar 
+class Optune_gig_calendar 
 {
     // Holds the values to be used in the fields callbacks
     private $options;
 
     // Start up
     public function __construct(){
-      add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
-		add_action( 'admin_init', array( $this, 'page_init' ) );
+      add_action( 'admin_menu', array( $this, 'optune_add_plugin_page' ) );
+		add_action( 'admin_init', array( $this, 'optune_page_init' ) );
     }
 
     // Add options page to main menu
-    public function add_plugin_page(){
-		 add_menu_page('Optune Gigs', 'Optune Gigs', 'administrator', 'gig-settings', array( $this, 'gig_settings_page' ), 'dashicons-calendar-alt'); }
+    public function optune_add_plugin_page(){
+		 add_menu_page('Optune Gigs', 'Optune Gigs', 'administrator', 'gig-settings', array( $this, 'optune_gig_settings_page' ), 'dashicons-calendar-alt'); }
 
     // Show Options page
-    public function gig_settings_page(){
+    public function optune_gig_settings_page(){
         $this->options = get_option( 'gig_option_name' );
         ?>
         <div class="wrap">
@@ -37,12 +37,12 @@ class GigCalendar
     }
 
     // Register and add settings
-    public function page_init()
+    public function optune_page_init()
     {        
         register_setting(
             'gig_option_group', // Option group
             'gig_option_name', // Option name
-            array( $this, 'sanitize' ) // Sanitize
+            array( $this, 'optune_sanitize' ) // Sanitize
         );
 
         add_settings_section(
@@ -54,34 +54,34 @@ class GigCalendar
 
 		  // Username input
         add_settings_field(
-            'gig_username', 
+            'optune_gig_username', 
             'Your Optune Username', 
-            array( $this, 'gig_username' ), 
+            array( $this, 'optune_gig_username' ), 
             'gig-settings-admin', 
             'gig_setting_section_id'
         );      
 
 		  // Default post status
         add_settings_field(
-            'gig_post_status', 
+            'optune_gig_post_status', 
             'Default Post Status', 
-            array( $this, 'gig_post_status' ), 
+            array( $this, 'optune_gig_post_status' ), 
             'gig-settings-admin', 
             'gig_setting_section_id'
         );      
 		  
 		  // Default post type
         add_settings_field(
-            'gig_post_type', 
+            'optune_gig_post_type', 
             'Default Post Type', 
-            array( $this, 'gig_post_type' ), 
+            array( $this, 'optune_gig_post_type' ), 
             'gig-settings-admin', 
             'gig_setting_section_id'
         );      
     }
 
     // Sanitize each setting field as needed: @param array $input Contains all settings fields as array keys
-    public function sanitize( $input )
+    public function optune_sanitize( $input )
     {
         $new_input = array();
         if( isset( $input['gig_username'] ) )
@@ -97,7 +97,7 @@ class GigCalendar
     }
 
     // Print username field
-    public function gig_username(){
+    public function optune_gig_username(){
         printf(
             '<input type="text" id="gig_username" name="gig_option_name[gig_username]" value="%s" />',
             isset( $this->options['gig_username'] ) ? esc_attr( $this->options['gig_username']) : ''
@@ -105,7 +105,7 @@ class GigCalendar
     }
 
     // Print post status field
-    public function gig_post_status(){
+    public function optune_gig_post_status(){
         echo
 				'<select type="option" id="gig_post_status" name="gig_option_name[gig_post_status]">
 					<option ', ( $this->options['gig_post_status'] == 'publish' ? 'selected' : '' ), ' value="publish">publish</option>
@@ -115,7 +115,7 @@ class GigCalendar
     }
 
     // Print post type field
-    public function gig_post_type(){
+    public function optune_gig_post_type(){
         echo
 				'<select type="option" id="gig_post_type" name="gig_option_name[gig_post_type]">
 					<option ', ( $this->options['gig_post_type'] == 'post' ? 'selected' : '' ), ' value="post">post</option>
@@ -126,7 +126,7 @@ class GigCalendar
 }
 
 // Api helper
-class GigPosts
+class Optune_gig_posts
 {
 	// Special post type to detect Gigs
 	const SPEC = 'gig';
