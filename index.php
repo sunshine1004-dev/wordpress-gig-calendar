@@ -12,18 +12,18 @@
 require_once( 'optune.php' );
 
 // Add shortcode to display Gig calendar
-add_shortcode('gig-calendar', 'show_gig_calendar');
-function show_gig_calendar(){
-	$gigs = new GigPosts();
+add_shortcode('optune-gig-calendar', 'optune_show_gig_calendar');
+function optune_show_gig_calendar(){
+	$gigs = new Optune_gig_posts();
 
 	// If our Gigs info is old...
 	if( $gigs->isOld() ){
-		require_once( 'lib/Http.php' );
-
 		// Remove old gigs to insert new one
 		$gigs->removeOldGigs();
 
-		$web = new Simplify_HTTP();
+		require_once( 'lib/Http.php' );
+		$web = new Optune_simplify_http();
+
 		$data = $web->apiRequest( $gigs->options['gig_username'], 'GET' );
 		if( $data )
 			$gigs->storeGigs( $data );
@@ -37,12 +37,12 @@ function show_gig_calendar(){
 }
 
 // Add default CSS
-add_action( 'wp_enqueue_scripts', 'add_css_styles' );
-function add_css_styles() {
-    wp_enqueue_style( 'optune_css', plugins_url( 'css/style.css', __FILE__ ), array(), '' );
+add_action( 'wp_enqueue_scripts', 'optune_add_css_style' );
+function optune_add_css_style() {
+    wp_enqueue_style( 'optune_css_style', plugins_url( 'css/style.css', __FILE__ ), array(), '' );
 }
 
 // Display settings page if we in Admin section
 if( is_admin() ){
-		$admin = new GigCalendar(); }
+		$admin = new Optune_gig_calendar(); }
 

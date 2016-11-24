@@ -1,6 +1,6 @@
 <?php
 
-class Simplify_HTTP
+class Optune_Simplify_HTTP
 {
 	const DELETE = "DELETE";
 	const GET = "GET";
