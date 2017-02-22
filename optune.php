@@ -69,29 +69,27 @@ class Optune_gig_calendar
             'gig-settings-admin', 
             'gig_setting_section_id'
         );      
-		  
-		  // Default post type
-        add_settings_field(
-            'optune_gig_post_type', 
-            'Default Post Type', 
-            array( $this, 'optune_gig_post_type' ), 
-            'gig-settings-admin', 
-            'gig_setting_section_id'
-        );      
     }
 
     // Sanitize each setting field as needed: @param array $input Contains all settings fields as array keys
     public function optune_sanitize( $input )
     {
+        $this->options = get_option( 'gig_option_name' );
+		  if( $input['gig_username'] != $this->options['gig_username'] || $input['gig_post_status'] != $this->options['gig_post_status'] ) 
+			  {
+					if ( get_option( 'gig_last_update' ) !== false ) { 
+						update_option( 'gig_last_update', $date ); 
+					} else { 
+						add_option( 'gig_last_update', $date, '', 'yes' ); 
+					}
+			  }
+
         $new_input = array();
         if( isset( $input['gig_username'] ) )
             $new_input['gig_username'] = sanitize_text_field( $input['gig_username'] );
 
         if( isset( $input['gig_post_status'] ) )
             $new_input['gig_post_status'] = sanitize_text_field( $input['gig_post_status'] );
-
-        if( isset( $input['gig_post_type'] ) )
-            $new_input['gig_post_type'] = sanitize_text_field( $input['gig_post_type'] );
 
         return $new_input;
     }
@@ -113,16 +111,6 @@ class Optune_gig_calendar
 					<option ', ( $this->options['gig_post_status'] == 'pending' ? 'selected' : '' ), ' value="pending">pending</option>
 				</select>';
     }
-
-    // Print post type field
-    public function optune_gig_post_type(){
-        echo
-				'<select type="option" id="gig_post_type" name="gig_option_name[gig_post_type]">
-					<option ', ( $this->options['gig_post_type'] == 'post' ? 'selected' : '' ), ' value="post">post</option>
-					<option ', ( $this->options['gig_post_type'] == 'gig' ? 'selected' : '' ), ' value="gig">gig</option>
-				</select>';
-    }
-
 }
 
 // Api helper
@@ -180,7 +168,7 @@ class Optune_gig_posts
 			$post_id = wp_insert_post( array
 				(
 					'post_title'		=> wp_strip_all_tags( $gig['title'] ),
-					'post_type'			=> $this->options['gig_post_type'],
+					'post_type'			=> 'post',
 					'post_content'		=> self::SPEC,
 					'post_author'		=> get_current_user_id(),
 					'post_status'		=> $this->options['gig_post_status'],
@@ -243,6 +231,7 @@ class Optune_gig_posts
 
 	// Display HTML formatted info about available Gigs
 	public function displayGigs( $gigs ){
+		asort( $gigs );
 		foreach( $gigs as $gig ){
 			$venue = get_post_meta( $gig->ID, 'venue', TRUE );
 			$venue = unserialize(  $venue );
