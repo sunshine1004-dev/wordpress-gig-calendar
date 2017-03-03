@@ -3,7 +3,7 @@
  * Plugin Name: Wordpress Gig Calendar
  * Plugin URI: https://github.com/optune/wordpress-gig-calendar
  * Description: This plugin adds Optune.me gigs to your website
- * Version: 0.0.9
+ * Version: 1.1
  * Author: Sergei Pestin
  * Author URI: https://www.upwork.com/fl/sergeypestin
  * License: GPL2

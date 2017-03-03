@@ -39,5 +39,10 @@ manage their upcoming gigs easily. Checkout www.optune.me
 
 == Changelog ==
 
+= 1.1 =
+- Sort Gigs by Date
+- Set default post type to "post"(no more select box for post type)
+- Auto update Gigs if settings in admin panel is changed
+
 = 1.0 =
 First release
